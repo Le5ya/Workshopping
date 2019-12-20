@@ -11,41 +11,52 @@ document.addEventListener('DOMContentLoaded', () =>{
  const ordersTable = document.getElementById('orders');
  const modalOrder = document.getElementById('order_read');
  const modalOrderActive = document.getElementById('order_active');
+ const headTable = document.getElementById('head-table');
+ localStorage.clear();
 
- const orders = JSONparse (localStorage.getItem('freeOrders')) || [];
- console.log(order);
+ const orders = JSON.parse(localStorage.getItem('freeOrders')) || [];
 
- const toStorage = ( =>{
- 	localStorage.setItem('freeOrders', JSON.stringifly(order));
- });
+ const toStorage = () =>{
+ localStorage.setItem('freeOrders', JSON.stringify(orders));
+ };
 
- const calcDeadline = (deadline) => {
- 	const day = 10;
- 	return day
- }
+const declOfNum = (number, titles) => number + ' ' + titles[(number % 100 > 4 && number % 100 < 20) ?
+ 2 : [2, 0, 1, 1, 1, 2][(number % 10 < 5) ? number % 10 : 5]];
 
- const renderOrders = () => {
+ const calcDeadline = (date) => {
+ const deadline = new Date(date);
+ //console.console.dir(deadline.toISOString());
+const toDay = Date.now();
+
+const remaining = (deadline - today) / 1000 / 60 / 60;
+
+if (remaining / 24 > 2) {
+//console.log(Math.floor(remaining));
+return declOfNum(Math.floor(remaining / 24), ['день' ,'дня' , 'дней']);
+    }
+
+return declOfNum(Math.floor(remaining), ['час' ,'часа' , 'часов']);
+   }
+
+   const renderOrders = () => {
 
    ordersTable.textContent = '';
 
-	orders.forEach((order, i) => {
-	console.log(order);
-	console.log(i);
-
-	ordersTable.innerHTML += `
-		<tr class="order ${order-active ? 'taken' : ''}" 
+	   orders.forEach((order, i) => {
+	   orders.innerHTML += `
+		<tr class="order ${order.active ? 'taken' : ''}"          
 		data-namber-order = "${i}"
 		<td>${i+1}</td>
 		<td>${order.title}</td>
 		<td class="${order.currency}"></td>
-		<td>${calcDeadline(order.deadline)}</td>
+		<td>${order.deadline}</td>
 	<tr/>`;
 
 
     });
  };
 
- const handlerModal = (event) => {
+      const handlerModal = (event) => {
  	  const target = event.target;
  	  const modal = target.closest('.order-modal');
  	  const order = order[modal.id];
@@ -56,91 +67,121 @@ document.addEventListener('DOMContentLoaded', () =>{
  	  	renderOrders();
  	  }
 
-console.log(target);
 
-    if (target.closest('.close' || target === modal){
+
+    if (target.closest('.close') || target === modal) {
         modal.style.display = 'none';
+        
     }
 
     if (target.classList.contains('.get-orders')){
     	order.active = true;
-    	
+    	baseAction();
     }
     if(target.id === 'capitulation'){
     	order.active = false;
-    	
+    	baseAction();
     }
     if(target.id === ready){
     order.splice(order.indexOf(order), 1);
-    
+    baseAction();
     	
     }
 
  }
 
  const openModal = (numberOrder) => {
-	 const order = orders[numberOrder];
-	 const modal = order.active ? modalOrderActive : modalOrder;
+ const order = orders[numberOrder];
 
-	 const{ title, firstName, email, phone, description,amount,
-	 	currency,deadline, active = false} = order;
+const { title, firstName, email, phone, description,amount,            /* spread syntax*/
+	 	currency, deadline, active = false } = order;
 
-	const modal = active ? modalOrderActive : modalOrder;
-const  
-	firstNameBlock = document.querySelector('.firstName'),
-	titleBlock = document.querySelector('.modal-title'),
-	emailBlock = document.querySelector('.email'),
-	descriptionBlock = document.querySelector('.description'),
-	deadlineBlock = document.querySelector('.deadline'),
-	currencyBlock = document.querySelector('.currency_img'),
-	countBlock = document.querySelector('.count'),
-	phoneBlock = document.querySelector('.phone');
+const  modal = active ? modalOrderActive : modalOrder;
+ 
+const  firstNameBlock = modal.querySelector('.firstName'),
+	   titleBlock = modal.querySelector('.modal-title'),
+	   emailBlock = modal.querySelector('.email'),
+	   descriptionBlock = modal.querySelector('.description'),
+	   deadlineBlock = modal.querySelector('.deadline'),
+	   currencyBlock = modal.querySelector('.currency_img'),
+	   countBlock = modal.querySelector('.count'),
+	   phoneBlock = modal.querySelector('.phone');
 
-    modal.id = numberOrder;
-    titleBlock.textContent = title;
-	firstNameBlock.textContent = firstName;
+       modal.id = numberOrder;
+       titleBlock.textContent = title;
+	   firstNameBlock.textContent = firstName;
 
-	emailBlock.textContent = email;
-	emailBlock.href = 'mailto:' + email;
-	descriptionBlock.textContent = description;
-	deadlineBlock.textContent = calcDeadline(deadline);
-	currencyBlock.className = 'currency_img';
-	currencyBlock.classList.add(currency);
-	countBlock.textContent = amount;
+	   emailBlock.textContent = email;
+	   emailBlock.href = 'mailto:' + email;
+	   descriptionBlock.textContent = description;
+	   deadlineBlock.textContent = calcDeadline(deadline);
+	   currencyBlock.className = 'currency_img';
+	   currencyBlock.classList.add(currency);
+	   countBlock.textContent = amount;
 
-	phoneBlock && (phoneBlock.href = 'tel:' + phone);
+phoneBlock && (phoneBlock.href = 'tel:' + phone);
 
-	modal.style.display = 'flex';
+ 	modal.style.display = 'flex';
 
-	modal.addEventListener('click', handlerModal);
- };
+ 	modal.addEventListener('click', handlerModal);
+ }; 
 
- ordersTable.addEventListener('click',(event)=>{
+ const sortOrder =(arr, property) => {
+ 	arr.sort((a, b) => a[property] > b[property] ? 1 : -1)
+ }
+
+ headTable.addEventListener('click', (event) =>{
+        const target = event.target;
+
+        if (target.classList.contains('head-sort')) {
+        	if (target.id === 'taskSort'){
+                    sortOrder(orders, 'title')
+        	}
+        		if (target.id === 'currencySort'){
+                    sortOrder(orders, 'currency')
+        		}
+        			if (target.id === 'deadlineSort'){
+                    sortOrder(orders, 'deadline')
+        			}
+        			toStorage();
+        			renderOrders();
+
+        	
+
+        }
+ });
+
+   ordersTable.addEventListener('click',(event)=>{
  	const target = event.target;
- 	const targetOrder = target.closest('.order')
- 	
- 	if(targetOrder) {
- 	console.log("ENTERED IF");	
- 	console.log(targetOrder);
- 	console.log(targetOrder.dataset);
- 	console.log(targetOrder.dataset.numberOrder);
- 	openModal(targetOrder.dataset.numberOrder);
+ 	console.log(target);
 
- 	console.log(orders[targetOrder.dataset.numberOrder]);
+ 	const targetOrder = target.closest('.order')
+ 	if(targetOrder) {
+    openModal(targetOrder.dataset.numberOrder);
+    //console.log("ENTERED IF");	
+ 	///console.log(targetOrder);
+ 	//console.log(targetOrder.dataset);
+ 	//console.log(targetOrder.dataset.numberOrder);
+ 	//openModal(targetOrder.dataset.numberOrder);
+
+     console.log(targetOrder.dataset.numberOrder);
  	}
 
  });
 
 
  customer.addEventListener('click', () => {
- 	blockCustomer.style.display = 'block';
  	blockChoice.style.display = 'none';
- 	btnExit.style.display = 'block'
+ 	const toDay = new Date().toISOString().substring(0, 10);
+ 	document.getElementById('deadline').min = toDay;
+ 	blockCustomer.style.display = 'block';
+ 	btnExit.style.display = 'block';
  });
 
  freelancer.addEventListener('click', () =>{
  	blockChoice.style.display = 'none';
  	renderOrders();
+ 	
  	blockFreelance.style.display ='block';
  	btnExit.style.display = 'block'
 
@@ -151,9 +192,9 @@ const
  	blockFreelance.style.display = 'none'
  	blockCustomer.style.display = 'none';
  	blockChoice.style.display = 'block';
- })
+ });
 
- formCustomer.addEventListener('submit',(e) => {
+ formCustomer.addEventListener('submit',(e) => {                /*callback function*/
  e.preventDefault();
 
   const obj = {};
@@ -161,18 +202,24 @@ const
   [...formCustomer.elements].forEach((elem) => {
 
   if((elem.TagName ==='INPUT' && elem.type !== 'radio') ||
- (elem.type === 'radio' && elem.checked) ||
-  elem.TagName === 'TEXTAREA'){
+  (elem.type === 'radio' && elem.checked) ||
+   elem.TagName === 'TEXTAREA'){
 
     obj[elem.name] = elem.value;
-     }
+
+if (elem.type !== 'radio') {
+	elem.value = '';
+}
+  }
                                                                           
- 	      
+ 	    
  });
-       formCustomer.reset();
+
+ formCustomer.reset();
 
   orders.push(obj);                                                                                                                          //перебор элементов формы с помощью методов forEach или filter
   
     });
+ 
 
 })
