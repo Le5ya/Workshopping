@@ -150,7 +150,7 @@ phoneBlock && (phoneBlock.href = 'tel:' + phone);
 
         }
  });
-
+console.log('test');
    ordersTable.addEventListener('click',(event)=>{
  	const target = event.target;
  	console.log(target);
@@ -158,11 +158,11 @@ phoneBlock && (phoneBlock.href = 'tel:' + phone);
  	const targetOrder = target.closest('.order')
  	if(targetOrder) {
     openModal(targetOrder.dataset.numberOrder);
-    //console.log("ENTERED IF");	
+    console.log("ENTERED IF");	
  	///console.log(targetOrder);
  	//console.log(targetOrder.dataset);
  	//console.log(targetOrder.dataset.numberOrder);
- 	//openModal(targetOrder.dataset.numberOrder);
+ 	
 
      console.log(targetOrder.dataset.numberOrder);
  	}
